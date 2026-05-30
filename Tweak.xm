@@ -3,7 +3,7 @@
 #import <CoreGraphics/CoreGraphics.h>
 
 // ==========================================
-// HOOKS NO PLAYER
+// HOOKS NO PLAYER - VELOCIDADE E FORÇA
 // ==========================================
 %hook PlayerController
 
@@ -15,12 +15,11 @@
 - (float)agility { return 999999.0f; }
 - (float)stamina { return 9999999.0f; }
 - (float)bodyChecking { return 999999.0f; }
-- (float)aggression { return 999999.0f; }
 
 %end
 
 // ==========================================
-// HOOKS NA FINALIZAÇÃO
+// HOOKS NA FINALIZAÇÃO - SEMPRE GOL
 // ==========================================
 %hook ShotController
 
@@ -33,40 +32,32 @@
 - (float)curve { return 999999.0f; }
 - (float)headers { return 999999.0f; }
 - (float)penalties { return 999999.0f; }
-- (BOOL)willShotGoInGoal:(id)shot { return YES; }
 
 %end
 
 // ==========================================
-// HOOKS NO DRIBLE
+// HOOKS NO DRIBLE - NUNCA PERDE A BOLA
 // ==========================================
 %hook DribbleController
 
 - (float)dribbling { return 999999.0f; }
 - (float)ballControl { return 999999.0f; }
-- (float)ballMagnetism { return 999999.0f; }
-- (float)dribbleSpeed { return 999999.0f; }
-- (BOOL)isDribbleIntercepted { return NO; }
-- (BOOL)canNutmegDefender { return YES; }
-- (float)skillMoveSuccessRate { return 100.0f; }
 
 %end
 
 // ==========================================
-// HOOKS NO SALTO
+// HOOKS NO SALTO - SUPER SALTO
 // ==========================================
 %hook JumpController
 
 - (float)jumping { return 999999.0f; }
 - (float)jumpHeight { return 999999.0f; }
 - (float)headingAccuracy { return 999999.0f; }
-- (float)verticalJump { return 999999.0f; }
-- (float)jumpReach { return 999999.0f; }
 
 %end
 
 // ==========================================
-// HOOKS NOS PASSES
+// HOOKS NOS PASSES - PERFEITOS
 // ==========================================
 %hook PassController
 
@@ -75,13 +66,11 @@
 - (float)throughBallAccuracy { return 999999.0f; }
 - (float)crossing { return 999999.0f; }
 - (float)vision { return 999999.0f; }
-- (float)passSpeed { return 999999.0f; }
-- (BOOL)isPassIntercepted { return NO; }
 
 %end
 
 // ==========================================
-// HOOKS NO GOLEIRO
+// HOOKS NO GOLEIRO - DEFENDE TUDO
 // ==========================================
 %hook GoalkeeperController
 
@@ -91,50 +80,22 @@
 - (float)diveReactionTime { return 0.0000001f; }
 - (float)diveRange { return 999999.0f; }
 - (float)positioning { return 999999.0f; }
-- (float)oneOnOneSaves { return 999999.0f; }
-- (float)penaltySaves { return 999999.0f; }
-- (BOOL)canSaveShot:(id)shot { return YES; }
-- (float)savePercentage { return 100.0f; }
 
 %end
 
 // ==========================================
-// HOOKS NA STAMINA
+// HOOKS NA STAMINA - INFINITA
 // ==========================================
 %hook StaminaController
 
 - (float)maxStamina { return 9999999.0f; }
 - (float)currentStamina { return 9999999.0f; }
 - (float)staminaDrainRate { return 0.0f; }
-- (float)staminaRecovery { return 9999999.0f; }
-- (BOOL)isExhausted { return NO; }
 
 %end
 
 // ==========================================
-// HOOKS NO CONTATO FÍSICO
-// ==========================================
-%hook PhysicsController
-
-- (BOOL)shouldOpponentFallOnContact { return YES; }
-- (float)opponentTripChance { return 100.0f; }
-- (float)collisionForce { return 999999.0f; }
-- (float)pushForce { return 999999.0f; }
-- (float)knockdownForce { return 999999.0f; }
-- (float)grappleRange { return 999.0f; }
-
-- (void)onContactWithOpponent:(id)opponent {
-    [opponent setKnockedDown:YES];
-    CGPoint pushForce = CGPointMake(-9999, -9999);
-    [opponent applyForce:pushForce];
-    [opponent setStunned:YES duration:999.0];
-    %orig;
-}
-
-%end
-
-// ==========================================
-// HOOKS NO INIMIGO (IA FRACA)
+// HOOKS NO INIMIGO - IA FRACA
 // ==========================================
 %hook AIOpponentController
 
@@ -143,18 +104,15 @@
 - (float)aiShotAccuracy { return 0.01f; }
 - (float)aiSpeed { return 0.1f; }
 - (float)aiStrength { return 0.01f; }
-- (float)aiDefenseAwareness { return 0.01f; }
-- (float)aiDifficultyMultiplier { return 0.01f; }
 
 %end
 
 // ==========================================
-// HOOKS NA LESÃO (IMORTAL)
+// HOOKS NA LESÃO - IMORTAL
 // ==========================================
 %hook InjuryController
 
 - (BOOL)canGetInjured { return NO; }
 - (float)injuryResistance { return 999999.0f; }
-- (float)fatigueResistance { return 999999.0f; }
 
 %end
