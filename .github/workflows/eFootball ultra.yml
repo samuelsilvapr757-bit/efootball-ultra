@@ -1,0 +1,155 @@
+name: Build eFootball Ultra (Tudo em um)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+      - name: Install Theos
+        run: |
+          bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)" || {
+            echo "Método 1 falhou, tentando método 2..."
+            git clone --recursive https://github.com/theos/theos.git ~/theos
+          }
+          echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+      
+      - name: Create project
+        run: |
+          export THEOS=$HOME/theos
+          mkdir -p /tmp/efootbuild
+          cd /tmp/efootbuild
+          
+          # Tweak.xm
+          cat > Tweak.xm << 'EOF'
+          #import <Foundation/Foundation.h>
+          #import <UIKit/UIKit.h>
+          
+          %hook PlayerController
+          - (float)sprintSpeed { return 999999.0f; }
+          - (float)acceleration { return 999999.0f; }
+          - (float)topSpeed { return 999999.0f; }
+          - (float)strength { return 999999.0f; }
+          - (float)balance { return 999999.0f; }
+          - (float)agility { return 999999.0f; }
+          - (float)stamina { return 9999999.0f; }
+          - (float)bodyChecking { return 999999.0f; }
+          %end
+          
+          %hook ShotController
+          - (float)finishing { return 999999.0f; }
+          - (float)shotPower { return 999999.0f; }
+          - (float)shotAccuracy { return 999999.0f; }
+          - (float)longShots { return 999999.0f; }
+          - (float)freekicks { return 999999.0f; }
+          - (float)headers { return 999999.0f; }
+          %end
+          
+          %hook DribbleController
+          - (float)dribbling { return 999999.0f; }
+          - (float)ballControl { return 999999.0f; }
+          %end
+          
+          %hook JumpController
+          - (float)jumping { return 999999.0f; }
+          - (float)jumpHeight { return 999999.0f; }
+          - (float)headingAccuracy { return 999999.0f; }
+          %end
+          
+          %hook PassController
+          - (float)shortPassing { return 999999.0f; }
+          - (float)longPassing { return 999999.0f; }
+          - (float)throughBallAccuracy { return 999999.0f; }
+          - (float)vision { return 999999.0f; }
+          %end
+          
+          %hook GoalkeeperController
+          - (float)diving { return 999999.0f; }
+          - (float)handling { return 999999.0f; }
+          - (float)reflexes { return 999999.0f; }
+          - (float)diveReactionTime { return 0.0000001f; }
+          - (float)diveRange { return 999999.0f; }
+          - (float)positioning { return 999999.0f; }
+          %end
+          
+          %hook StaminaController
+          - (float)currentStamina { return 9999999.0f; }
+          - (float)staminaDrainRate { return 0.0f; }
+          %end
+          
+          %hook AIOpponentController
+          - (float)aiReactionTime { return 999.0f; }
+          - (float)aiPassAccuracy { return 0.01f; }
+          - (float)aiShotAccuracy { return 0.01f; }
+          - (float)aiSpeed { return 0.1f; }
+          %end
+          
+          %hook InjuryController
+          - (BOOL)canGetInjured { return NO; }
+          - (float)injuryResistance { return 999999.0f; }
+          %end
+          EOF
+          
+          # Makefile
+          cat > Makefile << 'EOF'
+          include $(THEOS)/makefiles/common.mk
+          TWEAK_NAME = eFootballUltra
+          eFootballUltra_FILES = Tweak.xm
+          eFootballUltra_PLIST = eFootballUltra.plist
+          eFootballUltra_CFLAGS = -fobjc-arc
+          include $(THEOS_MAKE_PATH)/tweak.mk
+          EOF
+          
+          # control
+          cat > control << 'EOF'
+          Package: com.hackerai.efootballultra
+          Name: eFootballUltra
+          Depends: mobilesubstrate
+          Version: 1.0.0
+          Architecture: iphoneos-arm
+          Description: eFootball Ultra Hack
+          Maintainer: HackerAI
+          Author: HackerAI
+          Section: Tweaks
+          EOF
+          
+          # plist
+          cat > eFootballUltra.plist << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>Filter</key>
+              <dict>
+                  <key>Bundles</key>
+                  <array>
+                      <string>com.konami.eFootball</string>
+                  </array>
+              </dict>
+          </dict>
+          </plist>
+          EOF
+          
+          echo "Arquivos criados:"
+          ls -la
+      
+      - name: Compile
+        run: |
+          export THEOS=$HOME/theos
+          cd /tmp/efootbuild
+          make package ARCHS=arm64 DEBUG=0
+          echo "=== Arquivos gerados ==="
+          find . -name "*.dylib" -o -name "*.deb" -o -name "*.plist"
+      
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: eFootballUltra-FINAL
+          path: |
+            /tmp/efootbuild/.theos/obj/debug/arm64/eFootballUltra.dylib
+            /tmp/efootbuild/.theos/obj/arm64/eFootballUltra.dylib
+            /tmp/efootbuild/eFootballUltra.plist
+            /tmp/efootbuild/packages/*.deb
+          if-no-files-found: warn
