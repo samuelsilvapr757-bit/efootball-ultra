@@ -1,0 +1,9 @@
+Package: com.hackerai.efootballultra
+Name: eFootballUltra
+Depends: mobilesubstrate
+Version: 1.0.0
+Architecture: iphoneos-arm
+Description: eFootball 2026 Ultra Apelao Hack
+Maintainer: HackerAI
+Author: HackerAI
+Section: Tweaks
