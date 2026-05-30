@@ -1,0 +1,69 @@
+name: Build eFootball Ultra (Alternativo)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Theos
+        run: |
+          # Método alternativo de instalação
+          git clone --recursive https://github.com/theos/theos.git ~/theos
+          echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+          export THEOS=$HOME/theos
+          
+          # Baixa o sdks
+          cd $THEOS
+          mkdir -p sdks
+          curl -L https://github.com/xybp888/iOS-SDKs/releases/download/16.5/iPhoneOS16.5.sdk.zip -o sdks/iPhoneOS16.5.sdk.zip
+          cd sdks
+          unzip -o iPhoneOS16.5.sdk.zip
+          rm iPhoneOS16.5.sdk.zip
+          ls -la
+          
+          echo "Theos instalado em: $THEOS"
+      
+      - name: Create necessary files
+        run: |
+          export THEOS=$HOME/theos
+          
+          # Garante que o plist existe
+          if [ ! -f eFootballUltra.plist ]; then
+            echo '<?xml version="1.0" encoding="UTF-8"?>
+            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+            <plist version="1.0">
+            <dict>
+                <key>Filter</key>
+                <dict>
+                    <key>Bundles</key>
+                    <array>
+                        <string>com.konami.eFootball</string>
+                    </array>
+                </dict>
+            </dict>
+            </plist>' > eFootballUltra.plist
+          fi
+          
+          # Mostra tudo
+          ls -la
+      
+      - name: Build
+        run: |
+          export THEOS=$HOME/theos
+          make package ARCHS=arm64 DEBUG=0
+          
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: eFootballUltra-DOWNLOAD
+          path: |
+            .theos/obj/debug/arm64/eFootballUltra.dylib
+            .theos/obj/arm64/eFootballUltra.dylib
+            eFootballUltra.plist
+            packages/*.deb
+          if-no-files-found: warn
