@@ -1,0 +1,57 @@
+name: Build eFootball Ultra
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Theos (via brew)
+        run: |
+          brew install theos
+          echo "THEOS=$(brew --prefix theos)" >> $GITHUB_ENV
+      
+      - name: Verify installation
+        run: |
+          export THEOS=$(brew --prefix theos)
+          echo "THEOS=$THEOS"
+          ls -la $THEOS
+          which make
+      
+      - name: Show files
+        run: |
+          echo "=== Arquivos do repositório ==="
+          ls -la
+          echo "=== Tweak.xm ==="
+          cat Tweak.xm | head -5
+          echo "=== Makefile ==="
+          cat Makefile
+          echo "=== control ==="
+          cat control
+          echo "=== plist ==="
+          cat eFootballUltra.plist
+      
+      - name: Build
+        run: |
+          export THEOS=$(brew --prefix theos)
+          make package ARCHS=arm64 DEBUG=0
+          echo "=== Build concluído ==="
+          
+      - name: Find outputs
+        run: |
+          echo "=== Procurando arquivos gerados ==="
+          find . -name "*.dylib" -o -name "*.plist" -o -name "*.deb" 2>/dev/null
+          
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: eFootballUltra-PRONTO
+          path: |
+            **/*.dylib
+            **/*.plist
+            packages/*.deb
+          if-no-files-found: warn
