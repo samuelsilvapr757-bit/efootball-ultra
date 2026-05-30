@@ -1,0 +1,32 @@
+name: Build eFootball Ultra
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Theos
+        run: |
+          bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
+      
+      - name: Build
+        run: |
+          export THEOS=$HOME/theos
+          make package ARCHS=arm64 DEBUG=0
+          
+      - name: Upload dylib e plist
+        uses: actions/upload-artifact@v4
+        with:
+          name: eFootballUltra-FINAL
+          path: |
+            .theos/obj/debug/arm64/eFootballUltra.dylib
+            .theos/obj/arm64/eFootballUltra.dylib
+            eFootballUltra.plist
+          if-no-files-found: warn
